@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/besho/Downloads/amit -folder/chinook/chinook.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="5166"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,13:maininvoice_items"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="albums" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="84"/><column index="2" value="300"/><column index="3" value="76"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="artists" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="76"/><column index="2" value="300"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="customers" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="111"/><column index="2" value="97"/><column index="3" value="105"/><column index="4" value="300"/><column index="5" value="300"/><column index="6" value="167"/><column index="7" value="55"/><column index="8" value="124"/><column index="9" value="106"/><column index="10" value="165"/><column index="11" value="157"/><column index="12" value="233"/><column index="13" value="131"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="invoice_items" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="129"/><column index="2" value="93"/><column index="3" value="75"/><column index="4" value="88"/><column index="5" value="84"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="invoices" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="93"/><column index="2" value="111"/><column index="3" value="162"/><column index="4" value="300"/><column index="5" value="167"/><column index="6" value="109"/><column index="7" value="132"/><column index="8" value="160"/><column index="9" value="53"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="sqlite_sequence" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="108"/><column index="2" value="52"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="sqlite_stat1" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="108"/><column index="2" value="253"/><column index="3" value="89"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tracks" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="75"/><column index="2" value="300"/><column index="3" value="84"/><column index="4" value="121"/><column index="5" value="80"/><column index="6" value="300"/><column index="7" value="115"/><column index="8" value="79"/><column index="9" value="88"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">-- select the name of artist and his/her albums
+SELECT ar.name, al.Title
+from artists as ar
+left JOIN albums as al
+on ar.ArtistId = al.ArtistId
+ORDER by ar.name ASC
+
+-- SELECT ALL TRACKS FOR and albums for specific artist 
+SELECT ar.name, al.Title, tr.name
+from artists as ar
+LEFT JOIN albums as al
+on ar.ArtistId = al.ArtistId
+LEFT JOIN tracks as tr
+on al.AlbumId = tr.AlbumId
+WHERE ar.name = 'Led Zeppelin'
+
+
+-- who is the artist that Luis purchased his albums the most?
+SELECT c.FirstName, c.LastName,al.ArtistId, ar.name , count(al.ArtistID) 
+from customers as c
+JOIN invoices as i
+on c.CustomerId = i.CustomerId
+JOIN invoice_items as it
+on i.InvoiceId = it.InvoiceId
+JOIN tracks as tr
+on it.TrackId = tr.TrackId
+JOIN albums as al
+on tr.AlbumId = al.AlbumId
+JOIN artists as ar
+on al.ArtistId = ar.ArtistId
+WHERE c.FirstName = 'Luís'
+GROUP by ar.name
+ORDER by count(al.ArtistID) DESC
+LIMIT 1
+
+-- who is the artist whose albums were purchased the most?
+SELECT ar.name, i.InvoiceId, count(i.InvoiceId), count(ar.name)  
+from invoices as i
+JOIN invoice_items as it
+on i.InvoiceId = it.InvoiceId
+JOIN tracks as tr
+on it.TrackId = tr.TrackId
+JOIN albums as al
+on tr.AlbumId = al.AlbumId
+JOIN artists as ar
+on al.ArtistId = ar.ArtistId
+GROUP by ar.name
+ORDER by count(i.InvoiceId) DESC
+limit 1
+
+
+-- who is the customer who spend more money purchasing artists's albums?
+SELECT c.FirstName, c.LastName, i.CustomerId,i.total, sum(i.total)
+from customers as c
+JOIN invoices as i
+on c.CustomerId = i.CustomerId
+group by c.FirstName
+order by sum(i.total)DESC
+limit 1
+
+
+
+
+
+
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
